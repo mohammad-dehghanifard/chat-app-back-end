@@ -17,9 +17,9 @@ io.on("connection", socket => {
     const socketId = socket.id
     const userId = socket.handshake.query.userId;
     users.push({ userId: userId, socketId: socketId });
-    //emit sendMessage
+
+    // Send private messages between two users
     socket.on("send-message",(event) => {
-      // ارسال پیام بین کاربران
       const filterUser = users.filter((user) => user.userId === event.to);
       const receivedSocketId = filterUser[0].socketId;
       socket.broadcast.to(receivedSocketId).emit(receivedSingleMessageEvent,{
@@ -27,6 +27,18 @@ io.on("connection", socket => {
         "message" : event.message
       })
     })
+
+    // user join the chat group
+    socket.on(process.env.joinRoom, (event) => {
+      socket.join(`roomId${event.roomId}`);
+      console.log(`${userId} joined room`)
+    })
+    // user leave the chat group
+    socket.on(process.env.leaveRoom, (event) => {
+      socket.leave(`roomId${event.roomId}`);
+      console.log(`${userId} leave room`)
+    })
+
 
     // disconnect
     socket.on("disconnect",(event) => {
