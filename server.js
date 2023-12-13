@@ -10,7 +10,7 @@ const port = process.env.Port || 3000;
 const users = [];
 
 // Events
-const receivedSingleMessageEvent = process.env.receivedSingleMessageEvent;
+const receivedMessageEvent = process.env.receivedMessageEvent;
 
 // Socket Io
 io.on("connection", socket => {
@@ -18,14 +18,26 @@ io.on("connection", socket => {
     const userId = socket.handshake.query.userId;
     users.push({ userId: userId, socketId: socketId });
 
-    // Send private messages between two users
+    // Send Message
     socket.on("send-message",(event) => {
+     
+     if(event.roomId != undefined ){
+      io.to(`roomId${event.roomId}`).emit(receivedMessageEvent,{
+        "message": event.message,
+        "from": userId,
+      })
+     }
+      //Send private messages between two users
+     else{
       const filterUser = users.filter((user) => user.userId === event.to);
       const receivedSocketId = filterUser[0].socketId;
-      socket.broadcast.to(receivedSocketId).emit(receivedSingleMessageEvent,{
+      socket.broadcast.to(receivedSocketId).emit(receivedMessageEvent,{
         "on" : event.on,
         "message" : event.message
       })
+
+     }
+
     })
 
     // user join the chat group
