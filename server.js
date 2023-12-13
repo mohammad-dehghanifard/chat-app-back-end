@@ -20,7 +20,7 @@ io.on("connection", socket => {
 
     // Send Message
     socket.on("send-message",(event) => {
-     
+     // Group Chat
      if(event.roomId != undefined ){
       io.to(`roomId${event.roomId}`).emit(receivedMessageEvent,{
         "message": event.message,
@@ -32,7 +32,7 @@ io.on("connection", socket => {
       const filterUser = users.filter((user) => user.userId === event.to);
       const receivedSocketId = filterUser[0].socketId;
       socket.broadcast.to(receivedSocketId).emit(receivedMessageEvent,{
-        "on" : event.on,
+        "from" : userId,
         "message" : event.message
       })
 
