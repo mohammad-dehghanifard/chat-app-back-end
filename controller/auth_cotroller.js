@@ -14,9 +14,7 @@ exports.registerUser = async (req,res) => {
 
             try{
             // connect to db
-            const client = new MongoClient(process.env.DataBaseUrl);
-            const db = client.db(process.env.DataBaseName);
-            const userCollection = db.collection(process.env.UsereCollection);
+            const db = connectToMongoo(process.env.UsereCollection);
 
             const newUser = {
                 fullName: userObj.fullName,
@@ -24,22 +22,29 @@ exports.registerUser = async (req,res) => {
                 password : userObj.password
             };
 
-            const result = await userCollection.insertOne(newUser)
+            const result = await db.collection.insertOne(newUser)
 
             res.status(200).json({
                 "message": "user registered successfully",
                 "data": result
             });
 
-            await client.close;
+            await db.client.close;
 
             } catch(err){
-                console.log(err);
+                res.status(500).json({
+                    message: "Internal server error",
+                    "error" : err.message
+                });
             }
         } 
       }
 }
 
-async function openDatabase(collectionName){
-    
+// connect to database
+function connectToMongoo(collectionName){
+    const client = new MongoClient(process.env.DataBaseUrl);
+    const dataBase = client.db(process.env.DataBaseName);
+    const collection = dataBase.collection(collectionName);
+    return {dataBase, client,collection};
 }
