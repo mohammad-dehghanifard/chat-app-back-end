@@ -2,7 +2,7 @@ const {MongoClient} = require("mongodb");
 
 exports.registerUser = async (req,res) => {
     {
-        const userObj = {fullName : req.body.fullName,userName: req.body.userName,password : req.body.password}
+        const userObj = {fullName,userName,password} = req.body;
         // clinet no send all properties in the request
         if(userObj.fullName === undefined || userObj.userName === undefined || userObj.password === undefined){
           res.status(400).json({
@@ -11,24 +11,19 @@ exports.registerUser = async (req,res) => {
         }
         // insert user successfully
         else{
-
             try{
             // connect to db
             const db = connectToMongoo(process.env.UsereCollection);
-
-            const newUser = {
-                fullName: userObj.fullName,
-                userName: userObj.userName,
-                password : userObj.password
-            };
-
+            // create user
+            const newUser = {fullName,userName, password};
+            // insert user
             const result = await db.collection.insertOne(newUser)
 
             res.status(200).json({
                 "message": "user registered successfully",
                 "data": result
             });
-
+            // colose database connection
             await db.client.close;
 
             } catch(err){
