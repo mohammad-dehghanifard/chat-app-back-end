@@ -1,4 +1,4 @@
-const {MongoClient} = require("mongodb");
+const {connectToMongoo} = require("../utils/connect_to_mongoo");
 
 exports.registerUser = async (req,res) => {
     {
@@ -36,10 +36,3 @@ exports.registerUser = async (req,res) => {
       }
 }
 
-// connect to database
-function connectToMongoo(collectionName){
-    const client = new MongoClient(process.env.DataBaseUrl);
-    const dataBase = client.db(process.env.DataBaseName);
-    const collection = dataBase.collection(collectionName);
-    return {dataBase, client,collection};
-}
