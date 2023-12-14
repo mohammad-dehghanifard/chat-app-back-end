@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require('express');
 const http = require('http');
 const app = express();
+const authRoute = require('./routers/auth')
 const server = http.createServer(app);
 const io = require("socket.io")(server);
 const bodyParser = require('body-parser');
@@ -69,42 +70,7 @@ io.on("connection", socket => {
 })
 
 // rest full api
-app.post("/api/register",(req,res) => {
-  const fullName = req.body.fullName
-  const userName = req.body.userName
-  const password = req.body.password
-
-  if(fullName === undefined || userName === undefined || password === undefined){
-    res.status(400).json({
-        "message": "please enter all required fields",
-    })
-
-    // connect to database
-    MongoClient.connect(process.env.DataBaseUrl,(err,db) => {
-      if(err) console.log(err);
-      // database object
-      const dbo = db.db(process.env.DataBaseName)
-      // user object
-      const newUser = {
-        fullName: fullName,
-        userName: userName,
-        password: password
-      }
-      // create collection
-      dbo.collection(process.env.UsereCollection).insertOne(newUser,(err,result) => {
-        if(err) console.log(err);
-        res.json(
-          {
-            "message" : "registered successfully",
-            "data" : result
-          }
-        )
-        db.close();
-      })
-    })
-
-  }
-})
+app.use('/api',authRoute)
 
 // server listening on port
 server.listen(port,() =>{console.log(`succesfully connected in ${port}`)});
