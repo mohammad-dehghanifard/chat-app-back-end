@@ -1,4 +1,5 @@
 const {connectToMongoo} = require("../utils/connect_to_mongoo");
+const bycript = require("bcrypt")
 
 exports.registerUser = async (req,res) => {
     {
@@ -14,8 +15,10 @@ exports.registerUser = async (req,res) => {
             try{
             // connect to db
             const db = connectToMongoo(process.env.UsereCollection);
-            // create user
-            const newUser = {fullName,userName, password};
+            // hash password
+            const hashPassword = await bycript.hash(password,process.env.SaltRounds);
+            // create user 
+            const newUser = {fullName,userName, hashPassword};
             // check username already exists
             const checkUserName = await db.collection.findOne({userName : userName})
             // insert user
