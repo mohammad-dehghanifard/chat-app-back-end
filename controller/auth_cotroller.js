@@ -1,6 +1,6 @@
 const { connectToMongoo } = require('../utils/connect_to_mongoo')
 const bcrypt = require('bcrypt')
-
+const jwt = require('jsonwebtoken')
 exports.registerUser = async (req, res) => {
   {
     const userObj = ({ fullName, username, password } = req.body)
@@ -81,11 +81,21 @@ exports.signup = async (req, res) => {
 
       // match password
       if(matchPassword){
-        // genrate jwt token....
+        const username = user.username;
+        // gentae token
+        const token =  jwt.sign(
+          {username},
+          process.env.JwtSecretKey,
+          {
+            algorithm : "HS256",
+            expiresIn : "1h"
+          }
+        )
 
         res.status(200).json({
             message: 'sign up successfully',
-            data: user
+            data: user,
+            token: token
           })
           db.client.close;
       }
