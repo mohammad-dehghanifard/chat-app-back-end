@@ -7,6 +7,9 @@ const server = http.createServer(app);
 const io = require("socket.io")(server);
 const bodyParser = require('body-parser');
 const {MongoClient} = require("mongodb");
+const getToken = require("./utils/get_user_id_from_token")
+
+
 
 // variables
 const port = process.env.Port || 3000;
@@ -20,9 +23,14 @@ app.use(bodyParser.json());
 const receivedMessageEvent = process.env.receivedMessageEvent;
 
 // Socket Io
-io.on("connection", socket => {
+io.on("connection",  async (socket) => {
     const socketId = socket.id
-    const userId = socket.handshake.query.userId;
+    // get user id from token
+    const token = socket.handshake.query.token
+    const checkToken = await getToken(token)
+    if(checkToken == null){ socket.disconnect()}
+    const userId = checkToken.data.id
+
     users.push({ userId: userId, socketId: socketId });
 
     // Send Message

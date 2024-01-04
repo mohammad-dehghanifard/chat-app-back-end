@@ -92,10 +92,19 @@ exports.signup = async (req, res) => {
           }
         )
 
+        //save tokne to db
+        await db.collection.updateOne(
+          {username: inputs.username},
+          {$set : {token: token}}
+        )
+
         res.status(200).json({
             message: 'sign up successfully',
-            data: user,
-            token: token
+            data: {
+              fullname: user.fullName,
+              username: user.username,
+              token : token
+            },
           })
           db.client.close;
       }
@@ -106,12 +115,9 @@ exports.signup = async (req, res) => {
             error: 'password invalid'
           })
       }
-
-      
     }
     // user not found
      else{
-    
         res.status(400).json({
             message: 'user not found',
             error: 'invalid username'
